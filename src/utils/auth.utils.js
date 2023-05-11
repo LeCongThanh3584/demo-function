@@ -22,9 +22,9 @@ const generateToken = (user) => {
 };
 
 const generateTokenByEmail = (email) => {
-  let token = jwt.sign(email, "forgetpasswordsecret", {
+  let token = jwt.sign(email, process.env.TOKEN_BY_EMAIL, {
     algorithm: "HS256",
-    expiresIn: "5m",
+    // expiresIn: process.env.ACCESS_TOKEN_LIFE,
   });
   return token;
 };
@@ -44,9 +44,13 @@ const verifyAccessToken = (access_token) =>
 const verifyRefreshToken = (refresh_token) =>
   verifyJwt(refresh_token, process.env.REFRESH_TOKEN_SECRET);
 
+const verifyTokenByEmail = (token_by_email) =>
+  verifyJwt(token_by_email, process.env.TOKEN_BY_EMAIL);
+
 module.exports = {
   generateToken,
   verifyAccessToken,
   verifyRefreshToken,
   generateTokenByEmail,
+  verifyTokenByEmail,
 };

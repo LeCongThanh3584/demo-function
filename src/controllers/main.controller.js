@@ -2,6 +2,7 @@ import db from "../models";
 import CRUDservice from "../services/CRUD.service";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/auth.utils";
+import { generateTokenByEmail } from "../utils/auth.utils";
 const notifier = require("node-notifier");
 import { verifyAccessToken } from "../utils/auth.utils";
 import transporter from "../config/mailer";
@@ -265,6 +266,42 @@ exports.sendEmail = async (req, res) => {
     });
   }
 };
+
+exports.getforgotPassword = (req, res) => {
+  let err = [];
+  return res.render("resetpassword.ejs", {values: err});
+}
+
+exports.postforgotPassword = async (req, res) => {
+  try {
+    let email = req.body.email;
+    let user = await db.User.findOne({
+      attributes: {
+          exclude: ["password"],
+      },
+      where: {email},
+    });
+    if(!user){
+      return res.send("Email isn't exist!");
+    }
+    let token = generateTokenByEmail(email);
+    const mailOptions = {
+      from: "admin@gmail.com",
+      to: email,
+      subject: "Yêu cầu đặt lại mật khẩu",
+      text: "nhấn vào đây để đặt lại mật khẩu",
+      html: `
+      <p><a href="http://localhost:2601/forgot-password?token=${token}">Nhấn vào đây để đặt lại mật khẩu</a></p>
+      `,
+    };
+    await transporter.sendMail(mailOptions);
+
+    return res.send("Please check the email to reset password, now you can close this page !");
+
+  } catch(e){
+    console.log("ERROR: ", e);
+  }
+}
 
 // exports.postLogin = async (req, res) => {
 //   try {
